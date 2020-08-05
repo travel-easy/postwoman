@@ -25,7 +25,7 @@
       </div>
     </div>
     <p v-if="environments.length === 0" class="info">
-      Create new environment
+      <i class="material-icons">help_outline</i> Create new environment
     </p>
     <div class="virtual-list">
       <ul>
@@ -37,9 +37,6 @@
             @select-environment="$emit('use-environment', environment)"
           />
         </li>
-        <li v-if="environments.length === 0">
-          <label>Environments are empty</label>
-        </li>
       </ul>
     </div>
   </pw-section>
@@ -47,7 +44,7 @@
 
 <style scoped lang="scss">
 .virtual-list {
-  max-height: calc(100vh - 241px);
+  max-height: calc(100vh - 245px);
 }
 
 ul {
@@ -58,10 +55,7 @@ ul {
 
 <script>
 import environment from "./environment"
-import { fb } from "../../functions/fb"
-
-const updateOnLocalStorage = (propertyName, property) =>
-  window.localStorage.setItem(propertyName, JSON.stringify(property))
+import { fb } from "~/helpers/fb"
 
 export default {
   components: {
@@ -82,14 +76,16 @@ export default {
   },
   computed: {
     environments() {
-      return this.$store.state.postwoman.environments
+      return fb.currentUser !== null
+        ? fb.currentEnvironments
+        : this.$store.state.postwoman.environments
     },
   },
   async mounted() {
     this._keyListener = function (e) {
       if (e.key === "Escape") {
         e.preventDefault()
-        this.showModalImportExport = false
+        this.showModalImportExport = this.showModalAdd = this.showModalEdit = false
       }
     }
     document.addEventListener("keydown", this._keyListener.bind(this))

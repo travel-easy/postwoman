@@ -27,7 +27,7 @@
 
 <style scoped lang="scss">
 .virtual-list {
-  max-height: calc(100vh - 294px);
+  max-height: calc(100vh - 298px);
 }
 
 ul,
@@ -49,7 +49,7 @@ ol {
 </style>
 
 <script>
-import { fb } from "../../functions/fb"
+import { fb } from "~/helpers/fb"
 
 export default {
   data() {

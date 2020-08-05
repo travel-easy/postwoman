@@ -2,39 +2,6 @@
   <div class="page">
     <div class="content">
       <div class="page-columns inner-left">
-        <pw-section v-if="showPreRequestScript" class="orange" label="Pre-Request" ref="preRequest">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("javascript_code") }}</label>
-                <div>
-                  <a
-                    href="https://github.com/liyasthomas/postwoman/wiki/Pre-Request-Scripts"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <button class="icon" v-tooltip="$t('wiki')">
-                      <i class="material-icons">help</i>
-                    </button>
-                  </a>
-                </div>
-              </div>
-              <Editor
-                v-model="preRequestScript"
-                :lang="'javascript'"
-                :options="{
-                  maxLines: '16',
-                  minLines: '8',
-                  fontSize: '16px',
-                  autoScrollEditorIntoView: true,
-                  showPrintMargin: false,
-                  useWorker: false,
-                }"
-              />
-            </li>
-          </ul>
-        </pw-section>
-
         <pw-section class="blue" :label="$t('request')" ref="request">
           <ul>
             <li class="shrink">
@@ -283,11 +250,12 @@
                     <input ref="payload" name="payload" type="file" @change="uploadPayload" />
                     <button
                       class="icon"
-                      @click="prettifyRequestBody()"
+                      ref="prettifyRequest"
+                      @click="prettifyRequestBody"
                       v-tooltip="$t('prettify_body')"
                       v-if="rawInput && this.contentType.endsWith('json')"
                     >
-                      <i class="material-icons">assistant</i>
+                      <i class="material-icons">photo_filter</i>
                     </button>
                   </div>
                 </div>
@@ -296,15 +264,18 @@
             <div v-if="!rawInput">
               <ul>
                 <li>
-                  <label for="reqParamList">{{ $t("parameter_list") }}</label>
-                  <textarea
-                    id="reqParamList"
-                    readonly
-                    v-textarea-auto-height="rawRequestBody"
-                    v-model="rawRequestBody"
-                    :placeholder="$t('add_one_parameter')"
-                    rows="1"
-                  ></textarea>
+                  <div class="flex-wrap">
+                    <label for="reqParamList">{{ $t("parameter_list") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="clearContent('bodyParams', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                    </div>
+                  </div>
                 </li>
               </ul>
               <ul v-for="(param, index) in bodyParams" :key="index">
@@ -363,7 +334,18 @@
             <div v-else>
               <ul>
                 <li>
-                  <label for="rawBody">{{ $t("raw_request_body") }}</label>
+                  <div class="flex-wrap">
+                    <label for="rawBody">{{ $t("raw_request_body") }}</label>
+                    <div>
+                      <button
+                        class="icon"
+                        @click="clearContent('rawParams', $event)"
+                        v-tooltip.bottom="$t('clear')"
+                      >
+                        <i class="material-icons">clear_all</i>
+                      </button>
+                    </div>
+                  </div>
                   <Editor
                     v-model="rawParams"
                     :lang="rawInputEditorLang"
@@ -401,40 +383,6 @@
               >
                 <i class="material-icons">code</i>
               </button>
-              <button
-                class="icon"
-                id="preRequestScriptButton"
-                v-tooltip.bottom="{
-                  content: !showPreRequestScript
-                    ? $t('show_prerequest_script')
-                    : $t('hide_prerequest_script'),
-                }"
-                @click="showPreRequestScript = !showPreRequestScript"
-              >
-                <i
-                  class="material-icons"
-                  :class="showPreRequestScript"
-                  v-if="!showPreRequestScript"
-                >
-                  playlist_add
-                </i>
-                <i class="material-icons" :class="showPreRequestScript" v-else>
-                  close
-                </i>
-              </button>
-              <button
-                class="icon"
-                id="preRequestScriptButto"
-                v-tooltip.bottom="{
-                  content: !testsEnabled ? 'Enable Tests' : 'Disable Tests',
-                }"
-                @click="testsEnabled = !testsEnabled"
-              >
-                <i class="material-icons" :class="testsEnabled" v-if="!testsEnabled">
-                  playlist_add_check
-                </i>
-                <i class="material-icons" :class="testsEnabled" v-else>close</i>
-              </button>
             </span>
             <span>
               <button
@@ -446,7 +394,7 @@
                 v-tooltip.bottom="$t('copy_request_link')"
               >
                 <i v-if="navigatorShare" class="material-icons">share</i>
-                <i v-else class="material-icons">file_copy</i>
+                <i v-else class="material-icons">content_copy</i>
               </button>
               <button
                 class="icon"
@@ -456,7 +404,7 @@
                 :disabled="!isValidURL"
                 v-tooltip.bottom="$t('save_to_collections')"
               >
-                <i class="material-icons">save</i>
+                <i class="material-icons">create_new_folder</i>
               </button>
               <button
                 class="icon"
@@ -470,73 +418,105 @@
           </div>
         </pw-section>
 
-        <pw-section v-if="testsEnabled" class="orange" label="Tests" ref="postRequestTests">
-          <ul>
-            <li>
-              <div class="flex-wrap">
-                <label for="generatedCode">{{ $t("javascript_code") }}</label>
-                <div>
-                  <a
-                    href="https://github.com/liyasthomas/postwoman/wiki/Post-Requests-Tests"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <button class="icon" v-tooltip="$t('wiki')">
-                      <i class="material-icons">help</i>
-                    </button>
-                  </a>
-                </div>
-              </div>
-              <Editor
-                v-model="testScript"
-                :lang="'javascript'"
-                :options="{
-                  maxLines: '16',
-                  minLines: '8',
-                  fontSize: '16px',
-                  autoScrollEditorIntoView: true,
-                  showPrintMargin: false,
-                  useWorker: false,
-                }"
-              />
-              <div v-if="testReports">
-                <div class="flex-wrap">
-                  <label>Test Reports</label>
-                  <div>
-                    <button
-                      class="icon"
-                      @click="clearContent('tests', $event)"
-                      v-tooltip.bottom="$t('clear')"
-                    >
-                      <i class="material-icons">clear_all</i>
-                    </button>
-                  </div>
-                </div>
-                <div v-for="(testReport, index) in testReports" :key="index">
-                  <div v-if="testReport.startBlock" class="info">
-                    <h4>{{ testReport.startBlock }}</h4>
-                  </div>
-                  <p v-else-if="testReport.result" class="flex-wrap info">
-                    <span :class="testReport.styles.class">
-                      <i class="material-icons">
-                        {{ testReport.styles.icon }}
-                      </i>
-                      <span>&nbsp; {{ testReport.result }}</span>
-                      <span v-if="testReport.message">
-                        <label>&nbsp; • &nbsp; {{ testReport.message }}</label>
-                      </span>
-                    </span>
-                  </p>
-                  <div v-else-if="testReport.endBlock"><hr /></div>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </pw-section>
-
         <section id="options">
           <tabs>
-            <tab :id="'authentication'" :label="$t('authentication')" :selected="true">
+            <tab
+              :id="'params'"
+              :label="
+                $t('parameters') + `${params.length !== 0 ? ' \xA0 • \xA0 ' + params.length : ''}`
+              "
+              :selected="true"
+            >
+              <pw-section class="pink" label="Parameters" ref="parameters">
+                <ul v-if="params.length !== 0">
+                  <li>
+                    <div class="flex-wrap">
+                      <label for="paramList">{{ $t("parameter_list") }}</label>
+                      <div>
+                        <button
+                          class="icon"
+                          @click="clearContent('parameters', $event)"
+                          v-tooltip.bottom="$t('clear')"
+                        >
+                          <i class="material-icons">clear_all</i>
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                <ul v-for="(param, index) in params" :key="index">
+                  <li>
+                    <input
+                      :placeholder="$t('parameter_count', { count: index + 1 })"
+                      :name="'param' + index"
+                      :value="param.key"
+                      @change="
+                        $store.commit('setKeyParams', {
+                          index,
+                          value: $event.target.value,
+                        })
+                      "
+                      autofocus
+                    />
+                  </li>
+                  <li>
+                    <input
+                      :placeholder="$t('value_count', { count: index + 1 })"
+                      :name="'value' + index"
+                      :value="param.value"
+                      @change="
+                        $store.commit('setValueParams', {
+                          index,
+                          value: $event.target.value,
+                        })
+                      "
+                    />
+                  </li>
+                  <li>
+                    <span class="select-wrapper">
+                      <select
+                        :name="'type' + index"
+                        @change="
+                          $store.commit('setTypeParams', {
+                            index,
+                            value: $event.target.value,
+                          })
+                        "
+                      >
+                        <option value="query" :selected="param.type === 'query'">{{
+                          $t("query")
+                        }}</option>
+                        <option value="path" :selected="param.type === 'path'">{{
+                          $t("path")
+                        }}</option>
+                      </select>
+                    </span>
+                  </li>
+                  <div>
+                    <li>
+                      <button
+                        class="icon"
+                        @click="removeRequestParam(index)"
+                        v-tooltip.bottom="$t('delete')"
+                        id="param"
+                      >
+                        <i class="material-icons">delete</i>
+                      </button>
+                    </li>
+                  </div>
+                </ul>
+                <ul>
+                  <li>
+                    <button class="icon" @click="addRequestParam">
+                      <i class="material-icons">add</i>
+                      <span>{{ $t("add_new") }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </pw-section>
+            </tab>
+
+            <tab :id="'authentication'" :label="$t('authentication')">
               <pw-section class="cyan" :label="$t('authentication')" ref="authentication">
                 <ul>
                   <li>
@@ -740,9 +720,14 @@
               </pw-section>
             </tab>
 
-            <tab :id="'headers'" :label="$t('headers')">
+            <tab
+              :id="'headers'"
+              :label="
+                $t('headers') + `${headers.length !== 0 ? ' \xA0 • \xA0 ' + headers.length : ''}`
+              "
+            >
               <pw-section class="orange" label="Headers" ref="headers">
-                <ul>
+                <ul v-if="headers.length !== 0">
                   <li>
                     <div class="flex-wrap">
                       <label for="headerList">{{ $t("header_list") }}</label>
@@ -756,14 +741,6 @@
                         </button>
                       </div>
                     </div>
-                    <textarea
-                      id="headerList"
-                      readonly
-                      v-textarea-auto-height="headerString"
-                      v-model="headerString"
-                      :placeholder="$t('add_one_header')"
-                      rows="1"
-                    ></textarea>
                   </li>
                 </ul>
                 <ul v-for="(header, index) in headers" :key="`${header.value}_${index}`">
@@ -821,119 +798,121 @@
               </pw-section>
             </tab>
 
-            <tab :id="'params'" :label="$t('parameters')">
-              <pw-section class="pink" label="Parameters" ref="parameters">
+            <tab :id="'pre_request_script'" :label="$t('pre_request_script')">
+              <pw-section
+                v-if="showPreRequestScript"
+                class="orange"
+                :label="$t('pre_request_script')"
+                ref="preRequest"
+              >
                 <ul>
                   <li>
                     <div class="flex-wrap">
-                      <label for="paramList">{{ $t("parameter_list") }}</label>
+                      <label for="generatedCode">{{ $t("javascript_code") }}</label>
                       <div>
-                        <button
-                          class="icon"
-                          @click="clearContent('parameters', $event)"
-                          v-tooltip.bottom="$t('clear')"
+                        <a
+                          href="https://github.com/liyasthomas/postwoman/wiki/Pre-Request-Scripts"
+                          target="_blank"
+                          rel="noopener"
                         >
-                          <i class="material-icons">clear_all</i>
-                        </button>
+                          <button class="icon" v-tooltip="$t('wiki')">
+                            <i class="material-icons">help_outline</i>
+                          </button>
+                        </a>
                       </div>
                     </div>
-                    <textarea
-                      id="paramList"
-                      readonly
-                      v-textarea-auto-height="queryString"
-                      v-model="queryString"
-                      :placeholder="$t('add_one_parameter')"
-                      rows="1"
-                    ></textarea>
-                  </li>
-                </ul>
-                <ul v-for="(param, index) in params" :key="index">
-                  <li>
-                    <input
-                      :placeholder="$t('parameter_count', { count: index + 1 })"
-                      :name="'param' + index"
-                      :value="param.key"
-                      @change="
-                        $store.commit('setKeyParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                      autofocus
+                    <JSEditor
+                      v-model="preRequestScript"
+                      :options="{
+                        maxLines: '16',
+                        minLines: '8',
+                        fontSize: '16px',
+                        autoScrollEditorIntoView: true,
+                        showPrintMargin: false,
+                        useWorker: false,
+                      }"
                     />
                   </li>
-                  <li>
-                    <input
-                      :placeholder="$t('value_count', { count: index + 1 })"
-                      :name="'value' + index"
-                      :value="param.value"
-                      @change="
-                        $store.commit('setValueParams', {
-                          index,
-                          value: $event.target.value,
-                        })
-                      "
-                    />
-                  </li>
-                  <li>
-                    <span class="select-wrapper">
-                      <select
-                        :name="'type' + index"
-                        @change="
-                          $store.commit('setTypeParams', {
-                            index,
-                            value: $event.target.value,
-                          })
-                        "
-                      >
-                        <option value="query" :selected="param.type === 'query'">{{
-                          $t("query")
-                        }}</option>
-                        <option value="path" :selected="param.type === 'path'">{{
-                          $t("path")
-                        }}</option>
-                      </select>
-                    </span>
-                  </li>
-                  <div>
-                    <li>
-                      <button
-                        class="icon"
-                        @click="removeRequestParam(index)"
-                        v-tooltip.bottom="$t('delete')"
-                        id="param"
-                      >
-                        <i class="material-icons">delete</i>
-                      </button>
-                    </li>
-                  </div>
                 </ul>
+              </pw-section>
+            </tab>
+
+            <tab
+              :id="'tests'"
+              :label="
+                $t('tests') +
+                `${testReports.length !== 0 ? ' \xA0 • \xA0 ' + testReports.length : ''}`
+              "
+            >
+              <pw-section
+                v-if="testsEnabled"
+                class="orange"
+                :label="$t('tests')"
+                ref="postRequestTests"
+              >
                 <ul>
                   <li>
-                    <button class="icon" @click="addRequestParam">
-                      <i class="material-icons">add</i>
-                      <span>{{ $t("add_new") }}</span>
-                    </button>
+                    <div class="flex-wrap">
+                      <label for="generatedCode">{{ $t("javascript_code") }}</label>
+                      <div>
+                        <a
+                          href="https://github.com/liyasthomas/postwoman/wiki/Post-Requests-Tests"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <button class="icon" v-tooltip="$t('wiki')">
+                            <i class="material-icons">help_outline</i>
+                          </button>
+                        </a>
+                      </div>
+                    </div>
+                    <JSEditor
+                      v-model="testScript"
+                      :options="{
+                        maxLines: '16',
+                        minLines: '8',
+                        fontSize: '16px',
+                        autoScrollEditorIntoView: true,
+                        showPrintMargin: false,
+                        useWorker: false,
+                      }"
+                    />
+                    <div v-if="testReports.length !== 0">
+                      <div class="flex-wrap">
+                        <label>Test Reports</label>
+                        <div>
+                          <button
+                            class="icon"
+                            @click="clearContent('tests', $event)"
+                            v-tooltip.bottom="$t('clear')"
+                          >
+                            <i class="material-icons">clear_all</i>
+                          </button>
+                        </div>
+                      </div>
+                      <div v-for="(testReport, index) in testReports" :key="index">
+                        <div v-if="testReport.startBlock" class="info">
+                          <h4>{{ testReport.startBlock }}</h4>
+                        </div>
+                        <p v-else-if="testReport.result" class="flex-wrap info">
+                          <span :class="testReport.styles.class">
+                            <i class="material-icons">
+                              {{ testReport.styles.icon }}
+                            </i>
+                            <span>&nbsp; {{ testReport.result }}</span>
+                            <span v-if="testReport.message">
+                              <label>&nbsp; • &nbsp; {{ testReport.message }}</label>
+                            </span>
+                          </span>
+                        </p>
+                        <div v-else-if="testReport.endBlock"><hr /></div>
+                      </div>
+                    </div>
                   </li>
                 </ul>
               </pw-section>
             </tab>
           </tabs>
-
-          <!-- <div class="flex-wrap">
-            <span></span>
-            <button
-              class="icon hide-on-small-screen"
-              @click="activeSidebar = !activeSidebar"
-              v-tooltip="{
-                content: activeSidebar ? 'Hide Sidebar' : 'Show Sidebar'
-              }"
-            >
-              <i class="material-icons">
-                {{ activeSidebar ? "last_page" : "first_page" }}
-              </i>
-            </button>
-          </div> -->
         </section>
 
         <pw-section class="purple" id="response" :label="$t('response')" ref="response">
@@ -951,83 +930,9 @@
               />
             </li>
           </ul>
-          <ul v-if="response.body">
-            <li>
-              <div class="flex-wrap">
-                <label for="body">{{ $t("response") }}</label>
-                <div>
-                  <button
-                    class="icon"
-                    @click="ToggleExpandResponse"
-                    ref="ToggleExpandResponse"
-                    v-if="response.body"
-                    v-tooltip="{
-                      content: !expandResponse ? $t('expand_response') : $t('collapse_response'),
-                    }"
-                  >
-                    <i class="material-icons">
-                      {{ !expandResponse ? "unfold_more" : "unfold_less" }}
-                    </i>
-                  </button>
-                  <button
-                    class="icon"
-                    @click="downloadResponse"
-                    ref="downloadResponse"
-                    v-if="response.body"
-                    v-tooltip="$t('download_file')"
-                  >
-                    <i class="material-icons">get_app</i>
-                  </button>
-                  <button
-                    class="icon"
-                    @click="copyResponse"
-                    ref="copyResponse"
-                    v-if="response.body"
-                    v-tooltip="$t('copy_response')"
-                  >
-                    <i class="material-icons">file_copy</i>
-                  </button>
-                </div>
-              </div>
-              <div id="response-details-wrapper">
-                <Editor
-                  :value="responseBodyText"
-                  :lang="responseBodyType"
-                  :options="{
-                    maxLines: responseBodyMaxLines,
-                    minLines: '16',
-                    fontSize: '16px',
-                    autoScrollEditorIntoView: true,
-                    readOnly: true,
-                    showPrintMargin: false,
-                    useWorker: false,
-                  }"
-                />
-                <iframe
-                  :class="{ hidden: !previewEnabled }"
-                  class="covers-response"
-                  ref="previewFrame"
-                  src="about:blank"
-                ></iframe>
-              </div>
-              <div class="align-right" v-if="response.body && responseType === 'text/html'">
-                <button class="icon" @click.prevent="togglePreview">
-                  <i class="material-icons">
-                    {{ !previewEnabled ? "visibility" : "visibility_off" }}
-                  </i>
-                  <span>
-                    {{ previewEnabled ? $t("hide_preview") : $t("preview_html") }}
-                  </span>
-                </button>
-              </div>
-            </li>
-          </ul>
-          <ul v-for="(value, key) in response.headers" :key="key" class="response-headers">
-            <li>
-              <label :for="key">{{ key }}</label>
-              <input :id="key" :value="value" :name="key" readonly />
-            </li>
-          </ul>
+          <div v-if="response.body && response.body !== $t('loading')">
+            <response-renderer :response="response" />
+          </div>
         </pw-section>
       </div>
 
@@ -1156,7 +1061,7 @@
                     ref="copyRequestCode"
                     v-tooltip="$t('copy_code')"
                   >
-                    <i class="material-icons">file_copy</i>
+                    <i class="material-icons">content_copy</i>
                   </button>
                 </div>
               </div>
@@ -1338,28 +1243,24 @@
 </template>
 
 <script>
-import section from "../components/layout/section"
+import section from "~/components/layout/section"
 import url from "url"
 import querystring from "querystring"
-import { commonHeaders } from "../functions/headers"
-import textareaAutoHeight from "../directives/textareaAutoHeight"
-import parseCurlCommand from "../assets/js/curlparser.js"
-import getEnvironmentVariablesFromScript from "../functions/preRequest"
-import runTestScriptWithVariables from "../functions/postwomanTesting"
-import parseTemplateString from "../functions/templating"
-import AceEditor from "../components/ui/ace-editor"
-import { tokenRequest, oauthRedirect } from "../assets/js/oauth"
-import { cancelRunningRequest, sendNetworkRequest } from "../functions/network"
-import { fb } from "../functions/fb"
-import { getEditorLangForMimeType } from "~/functions/editorutils"
-import {
-  hasPathParams,
-  addPathParamsToVariables,
-  getQueryParams,
-} from "../functions/requestParams.js"
-import { parseUrlAndPath } from "../functions/utils/uri.js"
-import { httpValid } from "../functions/utils/valid"
-import { knownContentTypes, isJSONContentType } from "../functions/utils/contenttypes"
+import { commonHeaders } from "~/helpers/headers"
+import parseCurlCommand from "~/assets/js/curlparser.js"
+import getEnvironmentVariablesFromScript from "~/helpers/preRequest"
+import runTestScriptWithVariables from "~/helpers/postwomanTesting"
+import parseTemplateString from "~/helpers/templating"
+import AceEditor from "~/components/ui/ace-editor"
+import JSEditor from "~/components/ui/js-editor"
+import { tokenRequest, oauthRedirect } from "~/assets/js/oauth"
+import { cancelRunningRequest, sendNetworkRequest } from "~/helpers/network"
+import { fb } from "~/helpers/fb"
+import { getEditorLangForMimeType } from "~/helpers/editorutils"
+import { hasPathParams, addPathParamsToVariables, getQueryParams } from "~/helpers/requestParams.js"
+import { parseUrlAndPath } from "~/helpers/utils/uri.js"
+import { httpValid } from "~/helpers/utils/valid"
+import { knownContentTypes, isJSONContentType } from "~/helpers/utils/contenttypes"
 
 const statusCategories = [
   {
@@ -1409,37 +1310,36 @@ const parseHeaders = (xhr) => {
   return headerMap
 }
 export const findStatusGroup = (responseStatus) =>
-  statusCategories.find((status) => status.statusCodeRegex.test(responseStatus))
+  statusCategories.find(({ statusCodeRegex }) => statusCodeRegex.test(responseStatus))
 export default {
-  directives: {
-    textareaAutoHeight,
-  },
   components: {
     "pw-section": section,
-    "pw-toggle": () => import("../components/ui/toggle"),
-    "pw-modal": () => import("../components/ui/modal"),
-    autocomplete: () => import("../components/ui/autocomplete"),
-    history: () => import("../components/layout/history"),
-    collections: () => import("../components/collections"),
-    saveRequestAs: () => import("../components/collections/saveRequestAs"),
+    "pw-toggle": () => import("~/components/ui/toggle"),
+    "pw-modal": () => import("~/components/ui/modal"),
+    autocomplete: () => import("~/components/ui/autocomplete"),
+    history: () => import("~/components/layout/history"),
+    collections: () => import("~/components/collections"),
+    saveRequestAs: () => import("~/components/collections/saveRequestAs"),
     Editor: AceEditor,
-    environments: () => import("../components/environments"),
-    inputform: () => import("../components/firebase/inputform"),
-    notes: () => import("../components/firebase/feeds"),
-    login: () => import("../components/firebase/login"),
-    tabs: () => import("../components/ui/tabs"),
-    tab: () => import("../components/ui/tab"),
+    JSEditor: JSEditor,
+    environments: () => import("~/components/environments"),
+    inputform: () => import("~/components/firebase/inputform"),
+    notes: () => import("~/components/firebase/feeds"),
+    login: () => import("~/components/firebase/login"),
+    tabs: () => import("~/components/ui/tabs"),
+    tab: () => import("~/components/ui/tab"),
+    "response-renderer": () => import("~/components/lenses/ResponseBodyRenderer"),
   },
   data() {
     return {
       showModal: false,
-      showPreRequestScript: false,
-      testsEnabled: false,
+      showPreRequestScript: true,
+      testsEnabled: true,
       testScript: "// pw.expect('variable').toBe('value');",
       preRequestScript: "// pw.env.set('variable', 'value');",
-      testReports: null,
-      copyButton: '<i class="material-icons">file_copy</i>',
-      downloadButton: '<i class="material-icons">get_app</i>',
+      testReports: [],
+      copyButton: '<i class="material-icons">content_copy</i>',
+      downloadButton: '<i class="material-icons">save_alt</i>',
       doneButton: '<i class="material-icons">done</i>',
       isHidden: true,
       response: {
@@ -1448,9 +1348,7 @@ export default {
         body: "",
       },
       validContentTypes: knownContentTypes,
-      previewEnabled: false,
       paramsWatchEnabled: true,
-      expandResponse: false,
       showTokenList: false,
       showTokenRequest: false,
       showTokenRequestList: false,
@@ -1458,9 +1356,6 @@ export default {
       showRequestModal: false,
       editRequest: {},
       urlExcludes: {},
-      responseBodyText: "",
-      responseBodyType: "text",
-      responseBodyMaxLines: 16,
       activeSidebar: true,
       fb,
       customMethod: false,
@@ -1515,27 +1410,6 @@ export default {
         this.rawParams = getDefaultParams(contentType)
       }
       this.setRouteQueryState()
-    },
-    "response.body": function (val) {
-      if (
-        this.response.body === this.$t("waiting_send_req") ||
-        this.response.body === this.$t("loading")
-      ) {
-        this.responseBodyText = this.response.body
-        this.responseBodyType = "text"
-      } else {
-        if (isJSONContentType(this.responseType)) {
-          this.responseBodyText = JSON.stringify(this.response.body, null, 2)
-          this.responseBodyType =
-            this.response.body.constructor.name === "Object" ? "json" : "json5"
-        } else if (this.responseType === "text/html") {
-          this.responseBodyText = this.response.body
-          this.responseBodyType = "html"
-        } else {
-          this.responseBodyText = this.response.body
-          this.responseBodyType = "text"
-        }
-      }
     },
     params: {
       handler: function (newValue) {
@@ -1592,7 +1466,6 @@ export default {
       this.showRequestModal = true
     },
     method() {
-      // this.$store.commit('setState', { 'value': ["POST", "PUT", "PATCH", "DELETE"].includes(this.method) ? 'application/json' : '', 'attribute': 'contentType' })
       this.contentType = ["POST", "PUT", "PATCH", "DELETE"].includes(this.method)
         ? "application/json"
         : ""
@@ -1952,7 +1825,6 @@ export default {
           } else if (this.contentType.includes("x-www-form-urlencoded")) {
             requestBody = `"${requestBody}"`
           }
-          requestString.push(`xhr.setRequestHeader('Content-Length', ${requestBody.length})`)
           requestString.push(
             `xhr.setRequestHeader('Content-Type', '${this.contentType}; charset=utf-8')`
           )
@@ -1983,7 +1855,6 @@ export default {
           }
 
           requestString.push(`  body: ${requestBody},\n`)
-          headers.push(`    "Content-Length": ${requestBody.length},\n`)
           headers.push(`    "Content-Type": "${this.contentType}; charset=utf-8",\n`)
         }
         if (this.headers) {
@@ -2006,28 +1877,27 @@ export default {
         return requestString.join("")
       } else if (this.requestType === "cURL") {
         const requestString = []
-        requestString.push(`curl -X ${this.method} \n`)
-        requestString.push(`  '${this.url}${this.pathName}${this.queryString}' \n`)
+        requestString.push(`curl -X ${this.method}`)
+        requestString.push(`  '${this.url}${this.pathName}${this.queryString}'`)
         if (this.auth === "Basic Auth") {
           const basic = `${this.httpUser}:${this.httpPassword}`
           requestString.push(
-            `  -H 'Authorization: Basic ${window.btoa(unescape(encodeURIComponent(basic)))}' \n`
+            `  -H 'Authorization: Basic ${window.btoa(unescape(encodeURIComponent(basic)))}'`
           )
         } else if (this.auth === "Bearer Token" || this.auth === "OAuth 2.0") {
-          requestString.push(`  -H 'Authorization: Bearer ${this.bearerToken}' \n`)
+          requestString.push(`  -H 'Authorization: Bearer ${this.bearerToken}'`)
         }
         if (this.headers) {
           this.headers.forEach(({ key, value }) => {
-            if (key) requestString.push(`  -H '${key}: ${value}' \n`)
+            if (key) requestString.push(`  -H '${key}: ${value}'`)
           })
         }
         if (["POST", "PUT", "PATCH", "DELETE"].includes(this.method)) {
           const requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
-          requestString.push(`  -H 'Content-Length: ${requestBody.length}' \n`)
-          requestString.push(`  -H 'Content-Type: ${this.contentType}; charset=utf-8' \n`)
-          requestString.push(`  -d '${requestBody}' \n`)
+          requestString.push(`  -H 'Content-Type: ${this.contentType}; charset=utf-8'`)
+          requestString.push(`  -d '${requestBody}'`)
         }
-        return requestString.join("").slice(0, -2)
+        return requestString.join(" \\\n")
       }
     },
     tokenReqDetails() {
@@ -2062,14 +1932,27 @@ export default {
         behavior: "smooth",
       })
     },
-    handleUseHistory({ label, method, url, path, usesScripts, preRequestScript }) {
-      this.label = label
-      this.method = method
-      this.uri = url + path
-      this.url = url
-      this.path = path
-      this.showPreRequestScript = usesScripts
-      this.preRequestScript = preRequestScript
+    handleUseHistory(entry) {
+      this.label = entry.label
+      this.method = entry.method
+      this.uri = entry.url + entry.path
+      this.url = entry.url
+      this.path = entry.path
+      this.showPreRequestScript = entry.usesPreScripts
+      this.preRequestScript = entry.preRequestScript
+      this.auth = entry.auth
+      this.httpUser = entry.httpUser
+      this.httpPassword = entry.httpPassword
+      this.bearerToken = entry.bearerToken
+      this.headers = entry.headers
+      this.params = entry.params
+      this.bodyParams = entry.bodyParams
+      this.rawParams = entry.rawParams
+      this.rawInput = entry.rawInput
+      this.contentType = entry.contentType
+      this.requestType = entry.requestType
+      this.testScript = entry.testScript
+      this.testsEnabled = entry.usesPostScripts
       if (this.settings.SCROLL_INTO_ENABLED) this.scrollInto("request")
     },
     getVariablesFromPreRequestScript() {
@@ -2120,9 +2003,6 @@ export default {
       // Start showing the loading bar as soon as possible.
       // The nuxt axios module will hide it when the request is made.
       this.$nuxt.$loading.start()
-      if (this.$refs.response.$el.classList.contains("hidden")) {
-        this.$refs.response.$el.classList.toggle("hidden")
-      }
       this.previewEnabled = false
       this.response.status = this.$t("fetching")
       this.response.body = this.$t("loading")
@@ -2139,13 +2019,11 @@ export default {
         if (headers[id].key) headersObject[headers[id].key] = headers[id].value
       })
       headers = headersObject
-      // If the request has a body, we want to ensure Content-Length and
-      // Content-Type are sent.
+      // If the request has a body, we want to ensure Content-Type is sent.
       let requestBody
       if (this.hasRequestBody) {
         requestBody = this.rawInput ? this.rawParams : this.rawRequestBody
         Object.assign(headers, {
-          //'Content-Length': requestBody.length,
           "Content-Type": `${this.contentType}; charset=utf-8`,
         })
       }
@@ -2196,22 +2074,32 @@ export default {
           const headers = (this.response.headers = payload.headers)
           // We don't need to bother parsing JSON, axios already handles it for us!
           const body = (this.response.body = payload.data)
-          const date = new Date().toLocaleDateString()
-          const time = new Date().toLocaleTimeString()
-
           // Addition of an entry to the history component.
           const entry = {
             label: this.requestName,
             status,
-            date,
-            time,
+            date: new Date().toLocaleDateString(),
+            time: new Date().toLocaleTimeString(),
             method: this.method,
             url: this.url,
             path: this.path,
-            usesScripts: Boolean(this.preRequestScript),
+            usesPreScripts: this.showPreRequestScript,
             preRequestScript: this.preRequestScript,
             duration,
             star: false,
+            auth: this.auth,
+            httpUser: this.httpUser,
+            httpPassword: this.httpPassword,
+            bearerToken: this.bearerToken,
+            headers: this.headers,
+            params: this.params,
+            bodyParams: this.bodyParams,
+            rawParams: this.rawParams,
+            rawInput: this.rawInput,
+            contentType: this.contentType,
+            requestType: this.requestType,
+            testScript: this.testScript,
+            usesPostScripts: this.testsEnabled,
           }
 
           if ((this.preRequestScript && this.showPreRequestScript) || hasPathParams(this.params)) {
@@ -2250,8 +2138,22 @@ export default {
               method: this.method,
               url: this.url,
               path: this.path,
-              usesScripts: Boolean(this.preRequestScript),
+              usesPreScripts: this.showPreRequestScript,
               preRequestScript: this.preRequestScript,
+              star: false,
+              auth: this.auth,
+              httpUser: this.httpUser,
+              httpPassword: this.httpPassword,
+              bearerToken: this.bearerToken,
+              headers: this.headers,
+              params: this.params,
+              bodyParams: this.bodyParams,
+              rawParams: this.rawParams,
+              rawInput: this.rawInput,
+              contentType: this.contentType,
+              requestType: this.requestType,
+              testScript: this.testScript,
+              usesPostScripts: this.testsEnabled,
             }
 
             if (
@@ -2298,6 +2200,19 @@ export default {
         body: this.response.body,
         headers: this.response.headers,
       }
+
+      // Parse JSON body
+      if (
+        syntheticResponse.headers["content-type"] &&
+        isJSONContentType(syntheticResponse.headers["content-type"])
+      ) {
+        try {
+          syntheticResponse.body = JSON.parse(
+            new TextDecoder("utf-8").decode(new Uint8Array(syntheticResponse.body))
+          )
+        } catch (_e) {}
+      }
+
       const { testResults } = runTestScriptWithVariables(this.testScript, {
         response: syntheticResponse,
       })
@@ -2387,6 +2302,9 @@ export default {
       try {
         const jsonObj = JSON.parse(this.rawParams)
         this.rawParams = JSON.stringify(jsonObj, null, 2)
+        let oldIcon = this.$refs.prettifyRequest.innerHTML
+        this.$refs.prettifyRequest.innerHTML = this.doneButton
+        setTimeout(() => (this.$refs.prettifyRequest.innerHTML = oldIcon), 1000)
       } catch (e) {
         this.$toast.error(`${this.$t("json_prettify_invalid_body")}`, {
           icon: "error",
@@ -2427,67 +2345,6 @@ export default {
       this.$refs.generatedCode.select()
       document.execCommand("copy")
       setTimeout(() => (this.$refs.copyRequestCode.innerHTML = this.copyButton), 1000)
-    },
-    ToggleExpandResponse() {
-      this.expandResponse = !this.expandResponse
-      this.responseBodyMaxLines = this.responseBodyMaxLines == Infinity ? 16 : Infinity
-    },
-    copyResponse() {
-      this.$refs.copyResponse.innerHTML = this.doneButton
-      this.$toast.success(this.$t("copied_to_clipboard"), {
-        icon: "done",
-      })
-      const aux = document.createElement("textarea")
-      const copy = isJSONContentType(this.responseType)
-        ? JSON.stringify(this.response.body, null, 2)
-        : this.response.body
-      aux.innerText = copy
-      document.body.appendChild(aux)
-      aux.select()
-      document.execCommand("copy")
-      document.body.removeChild(aux)
-      setTimeout(() => (this.$refs.copyResponse.innerHTML = this.copyButton), 1000)
-    },
-    downloadResponse() {
-      const dataToWrite = JSON.stringify(this.response.body, null, 2)
-      const file = new Blob([dataToWrite], { type: this.responseType })
-      const a = document.createElement("a")
-      const url = URL.createObjectURL(file)
-      a.href = url
-      a.download = `${this.url + this.path} [${this.method}] on ${Date()}`.replace(/\./g, "[dot]")
-      document.body.appendChild(a)
-      a.click()
-      this.$refs.downloadResponse.innerHTML = this.doneButton
-      this.$toast.success(this.$t("download_started"), {
-        icon: "done",
-      })
-      setTimeout(() => {
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-        this.$refs.downloadResponse.innerHTML = this.downloadButton
-      }, 1000)
-    },
-    togglePreview() {
-      this.previewEnabled = !this.previewEnabled
-      if (this.previewEnabled) {
-        // If you want to add 'preview' support for other response types,
-        // just add them here.
-        if (this.responseType === "text/html") {
-          // If the preview already has that URL loaded, let's not bother re-loading it all.
-          if (this.$refs.previewFrame.getAttribute("data-previewing-url") === this.url) return
-          // Use DOMParser to parse document HTML.
-          const previewDocument = new DOMParser().parseFromString(
-            this.response.body,
-            this.responseType
-          )
-          // Inject <base href="..."> tag to head, to fix relative CSS/HTML paths.
-          previewDocument.head.innerHTML =
-            `<base href="${this.url}">` + previewDocument.head.innerHTML
-          // Finally, set the iframe source to the resulting HTML.
-          this.$refs.previewFrame.srcdoc = previewDocument.documentElement.outerHTML
-          this.$refs.previewFrame.setAttribute("data-previewing-url", this.url)
-        }
-      }
     },
     setRouteQueryState() {
       const flat = (key) => (this[key] !== "" ? `${key}=${this[key]}&` : "")
@@ -2584,6 +2441,15 @@ export default {
     },
     clearContent(name, { target }) {
       switch (name) {
+        case "bodyParams":
+          this.bodyParams = []
+          break
+        case "rawParams":
+          this.rawParams = "{}"
+          break
+        case "parameters":
+          this.params = []
+          break
         case "auth":
           this.auth = "None"
           this.httpUser = ""
@@ -2593,12 +2459,6 @@ export default {
           this.tokens = []
           this.tokenReqs = []
           break
-        case "headers":
-          this.headers = []
-          break
-        case "parameters":
-          this.params = []
-          break
         case "access_token":
           this.accessTokenName = ""
           this.oidcDiscoveryUrl = ""
@@ -2607,13 +2467,14 @@ export default {
           this.clientId = ""
           this.scope = ""
           break
+        case "headers":
+          this.headers = []
+          break
+        case "tests":
+          this.testReports = []
+          break
         case "tokens":
           this.tokens = []
-          break
-        case "tokenReqs":
-          this.tokenReqs = []
-        case "tests":
-          this.testReports = null
           break
         default:
           this.method = "GET"
@@ -2621,14 +2482,14 @@ export default {
           this.path = "/get"
           this.uri = this.url + this.path
           this.label = ""
+          this.bodyParams = []
+          this.rawParams = "{}"
+          this.files = []
+          this.params = []
           this.auth = "None"
           this.httpUser = ""
           this.httpPassword = ""
           this.bearerToken = ""
-          this.headers = []
-          this.params = []
-          this.bodyParams = []
-          this.rawParams = ""
           this.showTokenRequest = false
           this.tokens = []
           this.tokenReqs = []
@@ -2638,7 +2499,8 @@ export default {
           this.accessTokenUrl = ""
           this.clientId = ""
           this.scope = ""
-          this.files = []
+          this.headers = []
+          this.testReports = []
       }
       target.innerHTML = this.doneButton
       this.$toast.info(this.$t("cleared"), {

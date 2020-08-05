@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { fb } from "../../functions/fb"
+import { fb } from "~/helpers/fb"
 
 export default {
   data() {
@@ -88,7 +88,7 @@ export default {
     show: Boolean,
   },
   components: {
-    modal: () => import("../../components/ui/modal"),
+    modal: () => import("~/components/ui/modal"),
   },
   computed: {
     environmentJson() {
@@ -114,6 +114,7 @@ export default {
       }
       reader.readAsText(this.$refs.inputChooseFileToReplaceWith.files[0])
       this.fileImported()
+      this.syncToFBEnvironments()
     },
     importFromJSON() {
       let reader = new FileReader()
@@ -130,6 +131,7 @@ export default {
         }
       }
       reader.readAsText(this.$refs.inputChooseFileToImportFrom.files[0])
+      this.syncToFBEnvironments()
     },
     importFromPostwoman(environments) {
       let confirmation = this.$t("file_imported")
@@ -167,6 +169,13 @@ export default {
     syncEnvironments() {
       this.$store.commit("postwoman/replaceEnvironments", fb.currentEnvironments)
       this.fileImported()
+    },
+    syncToFBEnvironments() {
+      if (fb.currentUser !== null) {
+        if (fb.currentSettings[1].value) {
+          fb.writeEnvironments(JSON.parse(JSON.stringify(this.$store.state.postwoman.environments)))
+        }
+      }
     },
     fileImported() {
       this.$toast.info(this.$t("file_imported"), {

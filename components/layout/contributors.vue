@@ -9,48 +9,6 @@
     <div class="flex-wrap">
       <span>
         <a
-          href="https://opencollective.com/postwoman"
-          target="_blank"
-          rel="noopener"
-          v-tooltip.right="$t('one_time_recurring')"
-        >
-          <button class="icon">
-            <i class="material-icons">donut_large</i>
-            <span>{{ $t("open_collective") }}</span>
-          </button>
-        </a>
-        🔥 HOT
-      </span>
-    </div>
-    <div>
-      <a
-        href="https://www.paypal.me/liyascthomas"
-        target="_blank"
-        rel="noopener"
-        v-tooltip.right="$t('one_time')"
-      >
-        <button class="icon">
-          <i class="material-icons">payment</i>
-          <span>{{ $t("paypal") }}</span>
-        </button>
-      </a>
-    </div>
-    <div>
-      <a
-        href="https://www.patreon.com/liyasthomas"
-        target="_blank"
-        rel="noopener"
-        v-tooltip.right="$t('recurring')"
-      >
-        <button class="icon">
-          <i class="material-icons">local_parking</i>
-          <span>{{ $t("patreon") }}</span>
-        </button>
-      </a>
-    </div>
-    <div class="flex-wrap">
-      <span>
-        <a
           href="https://github.com/sponsors/postwoman-io"
           target="_blank"
           rel="noopener"
@@ -70,11 +28,51 @@
                 />
               </svg>
             </i>
-            <span>GitHub</span>
+            <span>GitHub Sponsors</span>
           </button>
         </a>
-        🎉 NEW
       </span>
+    </div>
+    <div class="flex-wrap">
+      <span>
+        <a
+          href="https://opencollective.com/postwoman"
+          target="_blank"
+          rel="noopener"
+          v-tooltip.right="$t('one_time_recurring')"
+        >
+          <button class="icon">
+            <i class="material-icons">donut_large</i>
+            <span>{{ $t("open_collective") }}</span>
+          </button>
+        </a>
+      </span>
+    </div>
+    <div>
+      <a
+        href="https://www.patreon.com/liyasthomas"
+        target="_blank"
+        rel="noopener"
+        v-tooltip.right="$t('recurring')"
+      >
+        <button class="icon">
+          <i class="material-icons">local_parking</i>
+          <span>{{ $t("patreon") }}</span>
+        </button>
+      </a>
+    </div>
+    <div>
+      <a
+        href="https://www.paypal.me/liyascthomas"
+        target="_blank"
+        rel="noopener"
+        v-tooltip.right="$t('one_time')"
+      >
+        <button class="icon">
+          <i class="material-icons">payment</i>
+          <span>{{ $t("paypal") }}</span>
+        </button>
+      </a>
     </div>
     <hr />
     <h3 class="title">Financial Contributors</h3>
@@ -88,6 +86,15 @@
       website.
       <a class="link" href="https://opencollective.com/postwoman/contribute">Contribute</a>.
     </p>
+    <div class="contributors">
+      <a href="https://tyk.io" target="_blank" rel="noopener">
+        <img
+          style="max-width: 320px;"
+          src="~assets/images/Tyk-side-project-logo-tagline-blk.png"
+          alt="Tyk Banner"
+        />
+      </a>
+    </div>
     <div class="contributors">
       <a href="https://opencollective.com/postwoman/organization/0/website">
         <img src="https://opencollective.com/postwoman/organization/0/avatar.svg" />
@@ -127,6 +134,13 @@
       <a class="link" href="https://opencollective.com/postwoman/contribute">Contribute</a>.
     </p>
     <div class="contributors">
+      <a href="http://tom.preston-werner.com" target="_blank" rel="noopener">
+        <img
+          style="max-width: 64px; max-height: 64px; border-radius: 100%;"
+          src="https://github.com/mojombo.png?size=64"
+          alt="Tom Preston-Werner"
+        />
+      </a>
       <a href="https://opencollective.com/postwoman">
         <img src="https://opencollective.com/postwoman/individuals.svg" />
       </a>
@@ -146,6 +160,7 @@
 <style scoped lang="scss">
 .contributors {
   display: flex;
+  align-items: center;
   flex-flow: row nowrap;
   overflow: auto;
   padding: 8px 0;

@@ -35,14 +35,6 @@
               </button>
             </div>
           </div>
-          <textarea
-            id="variableList"
-            readonly
-            v-textarea-auto-height="variableString"
-            v-model="variableString"
-            :placeholder="$t('add_one_variable')"
-            rows="1"
-          ></textarea>
         </li>
       </ul>
       <ul v-for="(variable, index) in this.editingEnvCopy.variables" :key="index">
@@ -114,19 +106,16 @@
 </template>
 
 <script>
-import textareaAutoHeight from "../../directives/textareaAutoHeight"
+import { fb } from "~/helpers/fb"
 
 export default {
-  directives: {
-    textareaAutoHeight,
-  },
   props: {
     show: Boolean,
     editingEnvironment: Object,
     editingEnvironmentIndex: Number,
   },
   components: {
-    modal: () => import("../../components/ui/modal"),
+    modal: () => import("~/components/ui/modal"),
   },
   data() {
     return {
@@ -134,7 +123,7 @@ export default {
     }
   },
   watch: {
-    editingEnvironment: function(update) {
+    editingEnvironment: function (update) {
       this.name =
         this.$props.editingEnvironment && this.$props.editingEnvironment.name
           ? this.$props.editingEnvironment.name
@@ -152,6 +141,13 @@ export default {
     },
   },
   methods: {
+    syncEnvironments() {
+      if (fb.currentUser !== null) {
+        if (fb.currentSettings[1].value) {
+          fb.writeEnvironments(JSON.parse(JSON.stringify(this.$store.state.postwoman.environments)))
+        }
+      }
+    },
     clearContent(e) {
       this.$store.commit("postwoman/removeVariables", [])
       e.target.innerHTML = this.doneButton
@@ -163,6 +159,7 @@ export default {
     addEnvironmentVariable() {
       let value = { key: "", value: "" }
       this.$store.commit("postwoman/addVariable", value)
+      this.syncEnvironments()
     },
     removeEnvironmentVariable(index) {
       let variableIndex = index
@@ -182,6 +179,7 @@ export default {
           },
         },
       })
+      this.syncEnvironments()
     },
     saveEnvironment() {
       if (!this.$data.name) {
@@ -197,10 +195,11 @@ export default {
         environmentIndex: this.$props.editingEnvironmentIndex,
       })
       this.$emit("hide-modal")
+      this.syncEnvironments()
     },
     hideModal() {
-      this.$data.name = undefined
       this.$emit("hide-modal")
+      this.$data.name = undefined
     },
   },
 }

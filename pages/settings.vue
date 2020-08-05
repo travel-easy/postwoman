@@ -147,7 +147,7 @@
               rel="noopener"
             >
               <button class="icon" v-tooltip="$t('wiki')">
-                <i class="material-icons">help</i>
+                <i class="material-icons">help_outline</i>
               </button>
             </a>
           </div>
@@ -209,17 +209,16 @@
 
 <script>
 import firebase from "firebase/app"
-import { fb } from "../functions/fb"
+import { fb } from "~/helpers/fb"
 
 export default {
   components: {
-    "pw-section": () => import("../components/layout/section"),
-    "pw-toggle": () => import("../components/ui/toggle"),
-    swatch: () => import("../components/settings/swatch"),
-    login: () => import("../components/firebase/login"),
-    logout: () => import("../components/firebase/logout"),
+    "pw-section": () => import("~/components/layout/section"),
+    "pw-toggle": () => import("~/components/ui/toggle"),
+    swatch: () => import("~/components/settings/swatch"),
+    login: () => import("~/components/firebase/login"),
+    logout: () => import("~/components/firebase/logout"),
   },
-
   data() {
     return {
       // NOTE:: You need to first set the CSS for your theme in /assets/css/themes.scss
@@ -327,7 +326,6 @@ export default {
       fb,
     }
   },
-
   watch: {
     proxySettings: {
       deep: true,
@@ -337,7 +335,6 @@ export default {
       },
     },
   },
-
   methods: {
     applyTheme({ class: name, color, aceEditor }) {
       this.applySetting("THEME_CLASS", name)
@@ -409,12 +406,10 @@ export default {
       }
     },
   },
-
   beforeMount() {
     this.settings.THEME_CLASS = document.documentElement.className
     this.settings.THEME_COLOR = this.getActiveColor()
   },
-
   computed: {
     proxySettings() {
       return {
@@ -422,6 +417,11 @@ export default {
         key: this.settings.PROXY_KEY,
       }
     },
+  },
+  head() {
+    return {
+      title: `Settings • ${this.$store.state.name}`,
+    }
   },
 }
 </script>

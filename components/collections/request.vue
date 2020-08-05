@@ -1,7 +1,11 @@
 <template>
   <div class="flex-wrap">
     <div>
-      <button class="icon" @click="selectRequest()" v-tooltip="$t('use_request')">
+      <button
+        class="icon"
+        @click="!doc ? selectRequest() : {}"
+        v-tooltip="!doc ? $t('use_request') : ''"
+      >
         <i class="material-icons">insert_drive_file</i>
         <span>{{ request.name }}</span>
       </button>
@@ -42,14 +46,24 @@ ul li {
 </style>
 
 <script>
+import { fb } from "~/helpers/fb"
+
 export default {
   props: {
     request: Object,
     collectionIndex: Number,
     folderIndex: Number,
     requestIndex: Number,
+    doc: Boolean,
   },
   methods: {
+    syncCollections() {
+      if (fb.currentUser !== null) {
+        if (fb.currentSettings[0].value) {
+          fb.writeCollections(JSON.parse(JSON.stringify(this.$store.state.postwoman.collections)))
+        }
+      }
+    },
     selectRequest() {
       this.$store.commit("postwoman/selectRequest", { request: this.request })
     },
@@ -60,6 +74,7 @@ export default {
         folderIndex: this.folderIndex,
         requestIndex: this.requestIndex,
       })
+      this.syncCollections()
     },
   },
 }

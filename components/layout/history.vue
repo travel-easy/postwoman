@@ -154,7 +154,7 @@
       </li>
     </ul>
     <p v-if="history.length === 0" class="info">
-      {{ $t("history_empty") }}
+      <i class="material-icons">schedule</i> {{ $t("history_empty") }}
     </p>
     <div v-if="history.length !== 0">
       <div class="flex-wrap" v-if="!isClearingHistory">
@@ -221,7 +221,7 @@
       </div>
       <div class="flex-wrap" v-else>
         <label for="clear-history-button" class="info">
-          {{ $t("are_you_sure") }}
+          <i class="material-icons">help_outline</i> {{ $t("are_you_sure") }}
         </label>
         <div>
           <button
@@ -248,7 +248,7 @@
 
 <style scoped lang="scss">
 .virtual-list {
-  max-height: calc(100vh - 294px);
+  max-height: calc(100vh - 290px);
 
   [readonly] {
     cursor: default;
@@ -306,8 +306,8 @@ ol {
 </style>
 
 <script>
-import { findStatusGroup } from "../../pages/index"
-import { fb } from "../../functions/fb"
+import { findStatusGroup } from "~/pages/index"
+import { fb } from "~/helpers/fb"
 
 const updateOnLocalStorage = (propertyName, property) =>
   window.localStorage.setItem(propertyName, JSON.stringify(property))
